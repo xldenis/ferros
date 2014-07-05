@@ -1,5 +1,7 @@
 NASM=nasm
 QEMU=qemu-system-i386
+RUSTC=rustc
+LD=ld -melf_i386
 
 all: floppy.img
 
@@ -12,6 +14,12 @@ floppy.img: loader.bin
 
 loader.bin: loader.asm
 	$(NASM) -o $@ -f bin $<
+
+main.o: main.rs
+	$(RUSTC) -O --target i386-intel-linux --crate-type lib -o $@ --emit obj $<
+
+main.bin: linker.ld main.o
+	$(LD) -o $@ -T $^
 
 clean:
 	rm -f *.bin *.img
