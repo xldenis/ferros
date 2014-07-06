@@ -27,7 +27,7 @@ mov sp, 0xffff
 sti                        ; let the interrupts resume
 
 mov ah, 2             ; disk read
-mov al, 24            ; num blocks
+mov al, 64            ; num blocks
 mov ch, 0             ; cylinder
 mov cl, 2             ; sector
 mov dh, 0             ; disk head
@@ -66,8 +66,7 @@ mov ecx, 80*25*2
 mov al, 0
 rep stosb
 mov [gs:0x30], dword 0
-hlt
-; call main
+call main
 
 abort:
 __morestack:

@@ -2,21 +2,21 @@ ENTRY(start)
 OUTPUT_FORMAT(binary)
 
 MEMORY {
-  ram : org = 0x7e00, l = 34k
+    ram : org = 0x7c00, l = 34K
 }
 
 SECTIONS {
-  . = 0x7c00;
+    . = 0x7c00;
 
-  .text : {
-    loader.o(.text)
-    *(.text)
-    *(.gnu.linkonce.t*)
-  } >ram
-  
-  /DISCARD/ : {
-    *(.comment)
-    *(.eh_frame)
-    *(.rel.eh_frame)
-  }
+    .text : {
+        loader.o(.text)
+        *(.text)
+        *(.gnu.linkonce.t*)
+    } >ram
+
+    /DISCARD/ : {
+        *(.comment)
+        *(.eh_frame)
+        *(.rel.eh_frame)
+    }
 }
