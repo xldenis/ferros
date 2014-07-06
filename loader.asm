@@ -3,26 +3,28 @@
 ; 16 bit ax bx cx dx
 ; 32 bit eax ebx ecx edx
 
+use16 
+
+global __morestack
+global abort
+global memcmp
+global memcpy
+global malloc
+global free
+global start
+
 extern main
-
-use16                      ; BIOS is in 16-bit real mode
-org 0x7c00                 ; bootloader loaded to offset 0x7c00
-
-jmp start
 
 start: 
 xor ax, ax
 mov ds, ax
 mov es, ax
 
-mov si, msg
-
 cli                        ; clear interrupts while stack is being setup
 mov ax, 0x9000 
 mov ss, ax                 ; start stack at 0x9000
 mov sp, 0xffff
 sti                        ; let the interrupts resume
-
 
 mov ah, 2             ; disk read
 mov al, 24            ; num blocks
@@ -44,7 +46,6 @@ jmp 0x08:pmode
 
 pmode:
 use32
-
 ; load all the other segments with 32-bit segment 2 (data)
 mov eax, 2 << 3
 mov ds, eax
@@ -64,8 +65,18 @@ mov edi, 0xb8000
 mov ecx, 80*25*2
 mov al, 0
 rep stosb
+mov [gs:0x30], dword 0
 hlt
 ; call main
+
+abort:
+__morestack:
+memcmp:
+memcpy:
+malloc:
+free:
+  jmp $
+
 
 gdtr:
     dw (gdt_end - gdt) + 1 ; size
@@ -93,12 +104,6 @@ gdt:
     db 0x4f                ; flags/(limit 16:19). flag is set to 32 bit protected mode
     db 0x00                ; base 24:31
 gdt_end:
-
-msg db 'Hello World', 13, 10, 0
-err db 'Could not read disk', 13, 10, 0
-sss db 'Hi from 32 bits', 0
-xpos db 0
-ypos db 0
 
 times 510-($-$$) db 0      ; pad with 0s
 db 0x55                    ; place 0xAA55 at offset 510

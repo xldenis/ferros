@@ -1,16 +1,19 @@
-ENTRY(main)
-OUTPUT_FORMAT(elf32-i386)
+ENTRY(start)
+OUTPUT_FORMAT(binary)
 
 MEMORY {
-  ram : org 0x7e00, l = 12k
+  ram : org = 0x7e00, l = 34k
 }
 
 SECTIONS {
-  . = 0x7e00
+  . = 0x7c00;
 
   .text : {
+    loader.o(.text)
     *(.text)
-  } > ram
+    *(.gnu.linkonce.t*)
+  } >ram
+  
   /DISCARD/ : {
     *(.comment)
     *(.eh_frame)
