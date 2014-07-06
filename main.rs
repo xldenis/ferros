@@ -33,7 +33,7 @@ fn range(low: uint, high: uint, iter: |uint| -> ()) {
 fn clear_screen(background: Color) {
   range(0, 80*25, |i| {
     unsafe {
-    *((0xb80000 + i * 2) as *mut u16) = (background as u16) << 12;
+    *((0xb8000 + i * 2) as *mut u16) = (background as u16) << 12;
     }
   });
 }
@@ -41,5 +41,5 @@ fn clear_screen(background: Color) {
 #[no_mangle]
 #[no_split_stack]
 pub fn main() {
-  clear_screen(Yellow);
+  clear_screen(Pink);
 }
