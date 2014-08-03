@@ -1,5 +1,10 @@
+#![crate_name = "main"]
+#![crate_type = "staticlib"]
 #![no_std]
-#![allow(ctypes)]
+#![feature(asm, macro_rules, default_type_params, phase, globs, lang_items, intrinsics)]
+
+#[phase(plugin, link)]
+extern crate core;
 
 enum Color {
     Black      = 0,
@@ -41,5 +46,5 @@ fn clear_screen(background: Color) {
 #[no_mangle]
 #[no_split_stack]
 pub fn main() {
-  clear_screen(Pink);
+  clear_screen(LightRed);
 }

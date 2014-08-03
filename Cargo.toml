@@ -1,0 +1,14 @@
+[package]
+
+name = "main"
+version = "0.0.0"
+authors = ["xldenis"]
+
+[[lib]]
+name = "main"
+path = "src/main.rs"
+crate-types = ["staticlib"]
+
+[dependencies.core]
+path = "./libcore"
+
