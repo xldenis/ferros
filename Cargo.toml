@@ -6,8 +6,8 @@ authors = ["xldenis"]
 
 [[lib]]
 name = "main"
-path = "src/main.rs"
-crate-types = ["staticlib"]
+path = "src/lib.rs"
+crate-types = [ "staticlib" ]
 
 [dependencies.core]
 path = "./libcore"

@@ -3,7 +3,17 @@ QEMU=qemu-system-i386
 RUSTC=rustc
 LD=i386-elf-ld -m elf_i386
 CLANG=clang
-CARGO=cargo
+CARGO=cargo build
+
+TARGET ?= i686-unknown-linux-gnu
+
+BDIR = build/x86
+TARGETDIR = target/$(TARGET)/release
+
+arch ?= x86
+
+RUSTCFLAGS  ?= --target=$(TARGET)
+RUSTCFLAGS2 ?= -O --emit=obj -Z no-landing-pads -Z lto --crate-name main
 
 all: floppy.img
 
@@ -19,11 +29,12 @@ main.o: main.rs
 	$(RUSTC) -O --target i386-intel-linux --crate-type lib -o $*.bc --emit=bc $<
 	$(CLANG) -ffreestanding -c $*.bc -o $@
 
-floppy.img: linker.ld loader.o main.o
+floppy.img: linker.ld loader.o build/x86/main.o
 	$(LD) -o $@ -T $^
 
 clean:
 	rm -f *.bin *.img *.o *.bc
-
-test: main.rs
-	$(CARGO) -O --target i386-intel-linux --crate-type lib -o $*.bc --emit=bc --verbose --release
+	rm -f build/$(arch)/*.o
+test: src/lib.rs
+	- $(CARGO) $(RUSTCFLAGS) --verbose --release
+	$(RUSTC) $< $(RUSTCFLAGS) $(RUSTCFLAGS2) --out-dir $(BDIR) -L $(TARGETDIR)/deps

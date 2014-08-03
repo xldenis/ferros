@@ -3,3 +3,4 @@
 *.o
 *.bc
 libcore/libcore
+target/

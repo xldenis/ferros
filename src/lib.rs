@@ -6,6 +6,9 @@
 #[phase(plugin, link)]
 extern crate core;
 
+#[lang = "stack_exhausted"] extern fn stack_exhausted() {}
+#[lang = "eh_personality"] extern fn eh_personality() {}
+#[lang = "begin_unwind"] extern fn begin_unwind() {}
 enum Color {
     Black      = 0,
     Blue       = 1,
