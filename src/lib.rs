@@ -6,9 +6,20 @@
 #[phase(plugin, link)]
 extern crate core;
 
+pub use runtime::{memset};
+
+#[macro_escape]
+mod macros;
+
+pub mod util;
+
+pub mod runtime;
+
+
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
 #[lang = "begin_unwind"] extern fn begin_unwind() {}
+
 enum Color {
     Black      = 0,
     Blue       = 1,
@@ -27,6 +38,7 @@ enum Color {
     Yellow     = 14,
     White      = 15,
 }
+
 
 // Implementation of color clear taken mostly from charliesome / rustboot
 

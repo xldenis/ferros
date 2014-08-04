@@ -1,3 +1,6 @@
+use core::mem::transmute;
+use util::bitv::Bitv;
+
 enum Node {
   USED   = 0,
   UNUSED = 1,
@@ -5,20 +8,34 @@ enum Node {
   SPLIT  = 3
 } 
 
+pub trait Allocator {
+  fn alloc(&mut self, size: uint) -> (*mut u8, uint);
+
+  fn realloc(&mut self, src: *mut u8, s: uint) -> (*mut u8, uint) {
+    self.free(s);
+    let(ptr, size) = self.alloc(s)
+    unsafe { copy_memory(ptr, src as *const u8, sz); }
+    (ptr, size)
+  }
+
+  fn free(&mut self, ptr: *mut u8);
+}
 
 struct BuddyAlloc {
   pub order: uint,
   pub tree: Bitv
 }
-fn alloc(&mut self, size) {
-  size = 32 - unsafe { ctlz32(size as u32 - 1) } as uint;
 
-  let mut level = self.order;
-  let mut index = 0;
-  loop {
-    match(get(index), level == size) {
+impl BuddyAlloc {
+  fn alloc(&mut self, size) {
+    size = 32 - unsafe { ctlz32(size as u32 - 1) } as uint;
 
-      (UNUSED, true) => {
+    let mut level = self.order;
+    let mut index = 0;
+    loop {
+      match(get(index), level == size) {
+
+        (UNUSED, true) => {
         //use this
         self.set(index, USED);
         self.offset(base, index);
@@ -102,14 +119,15 @@ fn free(&mut self, offset: uint) {
       }
     }
   }
-}
 
-fn get(&mut self, i: uint) -> Node {
-  unsafe {
-    transmute(self.tree.get(i))
+
+  fn get(&mut self, i: uint) -> Node {
+    unsafe {
+      transmute(self.tree.get(i))
+    }
   }
-}
 
-fn set(&mut self, i: uint, v: Node) {
-  self.tree.set(i, v as u8);
+  fn set(&mut self, i: uint, v: Node) {
+    self.tree.set(i, v as u8);
+  }
 }
