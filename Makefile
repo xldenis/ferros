@@ -12,8 +12,8 @@ TARGETDIR 	?= target/$(TARGET)/release
 
 arch 				?= x86
 
-RUSTCFLAGS  ?= --target=$(TARGET)
-RUSTCFLAGS2 ?= -O --emit=obj -Z no-landing-pads -Z lto --crate-name main
+RUSTCFLAGS  ?= --target=$(TARGET) 
+RUSTCFLAGS2 ?= -O --emit=obj -Z no-landing-pads -Z lto --crate-name main -C relocation-model=static
 
 all: floppy.img
 
