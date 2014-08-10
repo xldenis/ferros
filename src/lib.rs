@@ -12,9 +12,9 @@ pub use runtime::{memset};
 mod macros;
 
 pub mod util;
-
+pub mod mem;
 pub mod runtime;
-
+pub mod heap;
 
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
@@ -61,5 +61,6 @@ fn clear_screen(background: Color) {
 #[no_mangle]
 #[no_split_stack]
 pub fn main() {
+  heap::init();
   clear_screen(LightRed);
 }
