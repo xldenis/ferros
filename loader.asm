@@ -7,9 +7,6 @@ use16
 
 global __morestack
 global abort
-global memcmp
-global memcpy
-global malloc
 global free
 global start
 
@@ -70,9 +67,6 @@ call main
 
 abort:
 __morestack:
-memcmp:
-memcpy:
-malloc:
 free:
   jmp $
 

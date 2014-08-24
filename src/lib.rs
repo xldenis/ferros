@@ -15,6 +15,7 @@ pub mod util;
 pub mod mem;
 pub mod runtime;
 pub mod heap;
+pub mod idt;
 
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
@@ -62,5 +63,10 @@ fn clear_screen(background: Color) {
 #[no_split_stack]
 pub fn main() {
   heap::init();
+  // let table = idt::IDTable::new();
+  // table.load();
+  let a = box 5i;
+  
+
   clear_screen(LightRed);
 }

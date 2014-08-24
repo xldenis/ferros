@@ -26,12 +26,12 @@ pub trait Allocator {
   fn free(&mut self, ptr: *mut u8);
 }
 
-struct BuddyAlloc {
+pub struct BuddyAlloc {
   pub order: uint,
   pub tree: Bitv
 }
 
-struct Alloc {
+pub struct Alloc {
   pub buddy: BuddyAlloc,
   pub base: *mut u8,
   pub el_size: uint
@@ -164,7 +164,7 @@ impl BuddyAlloc {
   }
 }
 impl Alloc {
-  fn new(buddy: BuddyAlloc, base: *mut u8, size: uint) -> Alloc {
+  pub fn new(buddy: BuddyAlloc, base: *mut u8, size: uint) -> Alloc {
     return Alloc { buddy: buddy, base: base, el_size: size}
   }
 }
@@ -173,7 +173,7 @@ impl Allocator for Alloc {
   fn alloc(&mut self, size: uint) -> (*mut u8, uint) {
     let (pos, size) = self.buddy.alloc(size);
     return ( 
-      self.base.offset((pos << self.el_size) as int ), 
+      unsafe {self.base.offset((pos << self.el_size) as int )}, 
       size << self.el_size
       )
   }
