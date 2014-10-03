@@ -27,7 +27,7 @@ pub unsafe fn alloc(size: uint, align: uint) -> *mut u8 {
 
 #[no_mangle]
 pub unsafe extern "C" fn rust_allocate(size: uint, _align: uint) -> *mut u8 {
-  alloc(size, 0)
+  alloc(size,0)
 }
 
 #[inline]

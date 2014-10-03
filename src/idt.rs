@@ -1,24 +1,20 @@
 use core::mem::size_of;
-use core::intrinsics::copy_memory;
+use core::mem::transmute;
+use core::ptr::RawPtr;
+use heap;
 
-pub struct IDTable {
+pub struct IDTReg {
   size: u16,
   addr: *mut IDTDescr
 }
 
-impl IDTable {
-  pub fn new(cap: uint, table: *mut IDTDescr) -> IDTable {
-    IDTable {
-      size: (cap * size_of::<IDTDescr>()) as u16,
+impl IDTReg {
+  pub fn new(table: *mut IDTDescr, size: u16) -> IDTReg{
+    IDTReg {
+      size: size,
       addr: table
     }
   }
-
-  // pub fn enable(&self, index: uint, itr: *mut IDTDescr) {
-  //   let dst = self.addr + (index * size_of::<IDTDescr>());
-  //   copy_memory(dst, itr, 1);
-  // }
-  
   #[inline]
   pub fn load(&self) {
     unsafe {
@@ -53,6 +49,26 @@ impl IDTDescr {
       zero: 0,
       type_attr: flags,
       offset_2: addr_hi as u16
+    }
+  }
+}
+
+pub struct IDTable {
+  reg: &'static IDTReg,
+  table: *mut IDTDescr
+}
+
+impl IDTable {
+  pub fn new() -> IDTable{
+    unsafe {
+      let table = heap::alloc(size_of::<IDTDescr>() * 256,0) as *mut IDTDescr;
+      let reg   = heap::alloc(size_of::<IDTDescr>(),0) as *mut IDTReg;
+      *(reg as *mut IDTReg) = IDTReg::new(table, 256);
+
+      IDTable {
+        reg: transmute(reg),
+        table: table
+      }
     }
   }
 }

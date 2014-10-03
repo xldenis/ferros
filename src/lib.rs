@@ -19,7 +19,7 @@ pub mod idt;
 
 #[lang = "stack_exhausted"] extern fn stack_exhausted() {}
 #[lang = "eh_personality"] extern fn eh_personality() {}
-#[lang = "begin_unwind"] extern fn begin_unwind() {}
+#[lang = "fail_fmt"] extern fn fail_fmt() {}
 
 enum Color {
     Black      = 0,
@@ -63,10 +63,9 @@ fn clear_screen(background: Color) {
 #[no_split_stack]
 pub fn main() {
   heap::init();
-  // let table = idt::IDTable::new();
-  // table.load();
-  let a = box 5i;
-  
+  let a = box "test";
+  //let table = idt::IDTable::new();
+  // table.load();  
 
   clear_screen(LightRed);
 }

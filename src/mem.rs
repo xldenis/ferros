@@ -2,7 +2,6 @@ use core::ptr::RawPtr;
 use core::mem::transmute;
 use core::ptr::{copy_memory};
 use core::intrinsics::{ctlz32, offset};
-use core::intrinsics::offset;
 use util::bitv::Bitv;
 
 enum Node {
