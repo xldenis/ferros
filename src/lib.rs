@@ -1,25 +1,7 @@
-#![crate_name = "main"]
-#![crate_type = "staticlib"]
+#![feature(no_std, lang_items)]
 #![no_std]
-#![feature(asm, macro_rules, default_type_params, phase, globs, lang_items, intrinsics)]
 
-#[phase(plugin, link)]
-extern crate core;
-
-pub use runtime::{memset};
-
-#[macro_escape]
-mod macros;
-
-pub mod util;
-pub mod mem;
-pub mod runtime;
-pub mod heap;
-pub mod idt;
-
-#[lang = "stack_exhausted"] extern fn stack_exhausted() {}
-#[lang = "eh_personality"] extern fn eh_personality() {}
-#[lang = "begin_unwind"] extern fn begin_unwind() {}
+extern crate rlibc;
 
 enum Color {
     Black      = 0,
@@ -43,7 +25,9 @@ enum Color {
 
 // Implementation of color clear taken mostly from charliesome / rustboot
 
-fn range(low: uint, high: uint, iter: |uint| -> ()) {
+fn range<F>(low: usize, high: usize, iter: F)
+  where F : Fn(usize) -> () {
+
   let mut cur = low;
   while cur < high {
     iter(cur);
@@ -52,21 +36,18 @@ fn range(low: uint, high: uint, iter: |uint| -> ()) {
 }
 
 fn clear_screen(background: Color) {
+  let shifted_bg = (background as u16) << 12;
   range(0, 80*25, |i| {
     unsafe {
-    *((0xb8000 + i * 2) as *mut u16) = (background as u16) << 12;
+    *((0xb8000 + i * 2) as *mut u16) = shifted_bg;
     }
   });
 }
 
 #[no_mangle]
-#[no_split_stack]
 pub fn main() {
-  heap::init();
-  // let table = idt::IDTable::new();
-  // table.load();
-  let a = box 5i;
-  
-
-  clear_screen(LightRed);
+  clear_screen(Color::LightRed);
 }
+
+#[lang = "eh_personality"] extern fn eh_personality() {}
+#[lang = "panic_fmt"] extern fn panic_fmt() -> ! {loop{}}

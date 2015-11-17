@@ -1,14 +1,10 @@
 [package]
-
-name = "main"
+name = "ferros"
 version = "0.0.0"
 authors = ["xldenis"]
 
-[[lib]]
-name = "main"
-path = "src/lib.rs"
-crate-types = [ "staticlib" ]
+[lib]
+crate-type = ["staticlib"]
 
-[dependencies.core]
-path = "./libcore"
-
+[dependencies]
+rlibc = "0.1.4"
