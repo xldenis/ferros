@@ -26,17 +26,16 @@ all: $(kernel)
 .PHONY: clean run debug
 
 run: iso
-	mkdir -p build/isofiles/boot/grub
-	cp -R $(kernel) build/isofiles/boot/kernel.bin
-	cp -R $(grub_cfg) build/isofiles/boot/grub
-	$(GRUB_MK) -o $(iso) build/isofiles # 2> /dev/null
-	rm -r build/isofiles
 	$(QEMU) -drive format=raw,file=$(iso)
 
 iso: $(iso)
 
-$(iso): $(kernel)
-
+$(iso): $(kernel) $(grub_cfg)
+	mkdir -p build/isofiles/boot/grub
+	cp -R $(kernel) build/isofiles/boot/kernel.bin
+	cp -R $(grub_cfg) build/isofiles/boot/grub
+	$(GRUB_MK) -o $(iso) build/isofiles 2> /dev/null
+	rm -r build/isofiles
 
 $(kernel): $(linker_script) $(assembly_object_files) $(TARGETDIR)/libferros.a
 	$(LD) -n --gc-sections -o $@ -T $^

@@ -4,3 +4,4 @@
 *.bc
 libcore/libcore
 target/
+build/
