@@ -1,42 +1,53 @@
+TARGET 			?= x86_64-unknown-linux-gnu
+
 NASM 				?= nasm
-QEMU 				?= qemu-system-i386
-RUSTC 			?= rustc
-LD 					= i386-elf-ld -m elf_i386
+QEMU 				?= qemu-system-x86_64
+LD 					= x86_64-elf-ld
 CLANG 			?= clang
-CARGO 			?= cargo build
 CARGO_CLEAN ?= cargo clean
-TARGET 			?= i686-unknown-linux-gnu
+GRUB_MK     ?= grub-mkrescue
 
-BDIR 				?= build/x86
-TARGETDIR 	?= target/$(TARGET)/release
+arch 				?= x86_64
 
-arch 				?= x86
+TARGETDIR 	?= target/$(TARGET)/debug
+CARGOFLAGS  ?= --target=$(TARGET)
+RUSTCFLAGS  ?= -Z no-landing-pads
+kernel 			:= build/kernel-$(arch).bin
+iso    			:= build/os-$(arch).iso
 
-RUSTCFLAGS  ?= --target=$(TARGET) 
-RUSTCFLAGS2 ?= -O --emit=obj -Z no-landing-pads -Z lto --crate-name main -C relocation-model=static
+linker_script 				:= src/arch/$(arch)/linker.ld
+assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
+assembly_object_files := $(patsubst src/arch/$(arch)/%.asm, \
+    build/arch/$(arch)/%.o, $(assembly_source_files))
+grub_cfg := src/arch/$(arch)/grub.cfg
 
-all: floppy.img
+all: $(kernel)
 
 .PHONY: clean run debug
 
-run: floppy.img
-	$(QEMU) -fda $<
+run: iso
+	$(QEMU) -drive format=raw,file=$(iso)
 
-loader.o: loader.asm
-	$(NASM) -f elf32 -o $@ $<
+iso: $(iso)
 
-main.o: main.rs
-	$(RUSTC) -O --target i386-intel-linux --crate-type lib -o $*.bc --emit=bc $<
-	$(CLANG) -ffreestanding -c $*.bc -o $@
+$(iso): $(kernel) $(grub_cfg)
+	mkdir -p build/isofiles/boot/grub
+	cp -R $(kernel) build/isofiles/boot/kernel.bin
+	cp -R $(grub_cfg) build/isofiles/boot/grub
+	$(GRUB_MK) -o $(iso) build/isofiles 2> /dev/null
+	rm -r build/isofiles
 
-floppy.img: linker.ld loader.o $(BDIR)/main.o
-	$(LD) -o $@ -T $^
+$(kernel): $(linker_script) $(assembly_object_files) $(TARGETDIR)/libferros.a
+	$(LD) -n --gc-sections -o $@ -T $^
+
+build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
+	mkdir -p $(shell dirname $@)
+	$(NASM) -f elf64 $< -o $@
+
+$(TARGETDIR)/libferros.a:
+	@cargo rustc $(CARGOFLAGS) -- $(RUSTCFLAGS)
 
 clean:
-	rm -f *.bin *.img *.o *.bc
-	rm -f build/$(arch)/*.o
+	rm -rf $(TARGETDIR)
+	rm -rf build/
 	$(CARGO_CLEAN)
-
-$(BDIR)/main.o: src/lib.rs
-	- $(CARGO) $(RUSTCFLAGS) --verbose --release
-	$(RUSTC) $< $(RUSTCFLAGS) $(RUSTCFLAGS2) --out-dir $(BDIR) -L $(TARGETDIR)/deps
