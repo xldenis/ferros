@@ -46,7 +46,7 @@ fn clear_screen(background: Color) {
 
 #[no_mangle]
 pub fn main() {
-  clear_screen(Color::LightRed);
+  clear_screen(Color::LightPink);
 }
 
 #[lang = "eh_personality"] extern fn eh_personality() {}
