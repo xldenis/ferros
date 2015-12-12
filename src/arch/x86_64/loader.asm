@@ -11,6 +11,8 @@ start:
     call test_cpuid
     call test_long_mode
 
+    call enable_sse
+
     call setup_page_tables
     call enable_paging
 
@@ -64,11 +66,12 @@ test_long_mode:
     jmp error
 
 error:
-    mov dword [0xb8000], 0x4f524f45
-    mov dword [0xb8004], 0x4f3a4f52
-    mov dword [0xb8008], 0x4f204f20
-    mov byte  [0xb800a], al
-    hlt
+  mov dword [0xb8000], 0x40524045
+  mov dword [0xb8004], 0x404f4052
+  mov dword [0xb8008], 0x403a4052
+  mov dword [0xb800c], 0x00004020
+  mov byte  [0xb800e], al
+  hlt
 
 setup_page_tables:
     ; map first P4 entry to P3 table
@@ -118,6 +121,24 @@ enable_paging:
     mov cr0, eax ; causes a reboot
 
     ret
+
+enable_sse:
+  mov eax, 0x1
+  cpuid
+  test edx, 1<<25
+  jz .error
+
+  mov eax, cr0
+  and ax, 0xFFFB ; clear CR0.EM
+  or ax, 0x2     ; set CR0.MP
+  mov cr0, eax
+  mov eax,cr4    ; set CR4.OSXMMEXCPT CR4.OSFXSR
+  or ax, 3<<9
+  mov cr4, eax
+  ret
+.error:
+  mov al, "a"
+  jmp error
 
 section .rodata
 gdt64:

@@ -44,7 +44,7 @@ build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	mkdir -p $(shell dirname $@)
 	$(NASM) -f elf64 $< -o $@
 
-$(TARGETDIR)/libferros.a:
+$(TARGETDIR)/libferros.a: src/lib.rs
 	@cargo rustc $(CARGOFLAGS) -- $(RUSTCFLAGS)
 
 clean:
