@@ -1,28 +1,12 @@
-#![feature(no_std, lang_items)]
+#![feature(lang_items, const_fn, unique, core_str_ext)]
 #![no_std]
 
 extern crate rlibc;
+mod writer;
 
-enum Color {
-    Black      = 0,
-    Blue       = 1,
-    Green      = 2,
-    Cyan       = 3,
-    Red        = 4,
-    Pink       = 5,
-    Brown      = 6,
-    LightGray  = 7,
-    DarkGray   = 8,
-    LightBlue  = 9,
-    LightGreen = 10,
-    LightCyan  = 11,
-    LightRed   = 12,
-    LightPink  = 13,
-    Yellow     = 14,
-    White      = 15,
-}
-
-
+use writer::Color;
+use core::ptr::Unique;
+use core::fmt::Write;
 // Implementation of color clear taken mostly from charliesome / rustboot
 
 fn range<F>(low: usize, high: usize, iter: F)
@@ -47,6 +31,12 @@ fn clear_screen(background: Color) {
 #[no_mangle]
 pub fn main() {
   clear_screen(Color::LightPink);
+  let mut writer = writer::Writer {
+    column_pos: 0,
+    color: writer::ColorCode::new(Color::White, Color::Black),
+    buffer: unsafe {Unique::new(0xb8000 as *mut _)},
+  };
+  writer.write_str("Hello World!");
 }
 
 #[lang = "eh_personality"] extern fn eh_personality() {}

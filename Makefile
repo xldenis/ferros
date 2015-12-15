@@ -20,6 +20,7 @@ assembly_source_files := $(wildcard src/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst src/arch/$(arch)/%.asm, \
     build/arch/$(arch)/%.o, $(assembly_source_files))
 grub_cfg := src/arch/$(arch)/grub.cfg
+rust_os := $(TARGETDIR)/libferros.a
 
 all: $(kernel)
 
@@ -37,14 +38,14 @@ $(iso): $(kernel) $(grub_cfg)
 	$(GRUB_MK) -o $(iso) build/isofiles 2> /dev/null
 	rm -r build/isofiles
 
-$(kernel): $(linker_script) $(assembly_object_files) $(TARGETDIR)/libferros.a
-	$(LD) -n --gc-sections -o $@ -T $^
+$(kernel): $(linker_script) $(assembly_object_files) cargo $(rust_os)
+	$(LD) -n --gc-sections -o $@ -T $(linker_script) $(assembly_object_files) $(rust_os)
 
 build/arch/$(arch)/%.o: src/arch/$(arch)/%.asm
 	mkdir -p $(shell dirname $@)
 	$(NASM) -f elf64 $< -o $@
 
-$(TARGETDIR)/libferros.a: src/lib.rs
+cargo:
 	@cargo rustc $(CARGOFLAGS) -- $(RUSTCFLAGS)
 
 clean:
